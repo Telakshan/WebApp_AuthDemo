@@ -26,7 +26,8 @@ public class LoginModel : PageModel
     {
         if (!ModelState.IsValid) return Page();
 
-        if (Credential.UserName == "admin" && Credential.Password.Sha256() == defaultCredentials.Password)
+        if (Credential.UserName.Equals(defaultCredentials.UserName, StringComparison.OrdinalIgnoreCase) 
+            && Credential.Password.Sha256() == defaultCredentials.Password)
         {
             //creating the security context
             var claims = new List<Claim> 
@@ -35,10 +36,10 @@ public class LoginModel : PageModel
                 new Claim(ClaimTypes.Email, "admin@mywebsite.com")
             };
 
-            var identity = new ClaimsIdentity(claims, "wepapp_cookie");
+            var identity = new ClaimsIdentity(claims, "webapp_cookie");
             ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync("wepapp_cookie", claimsPrincipal);
+            await HttpContext.SignInAsync("webapp_cookie", claimsPrincipal);
 
             return RedirectToPage("/Index");
         }
