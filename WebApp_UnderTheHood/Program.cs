@@ -6,6 +6,14 @@ builder.Services.AddRazorPages();
 builder.Services.AddAuthentication("webapp_cookie").AddCookie("webapp_cookie", options =>
 {
     options.Cookie.Name = "webapp_cookie";
+    options.AccessDeniedPath = "/AccessDenied";
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Admin"));
+    options.AddPolicy("MustBelongToHRDepartment",
+        policy => policy.RequireClaim("Department", "HR"));
 });
 
 var app = builder.Build();
