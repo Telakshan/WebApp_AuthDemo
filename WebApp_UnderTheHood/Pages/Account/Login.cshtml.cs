@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using WebApp_AuthDemo.Common;
 using WebApp_UnderTheHood.Extensions;
 
 namespace WebApp_UnderTheHood.Pages.Account;
@@ -11,6 +13,12 @@ public class LoginModel : PageModel
 {
     [BindProperty]
     public Credential Credential { get; set; } = new Credential();
+    private readonly SessionSettings _sessionSettings;
+
+    public LoginModel(IOptions<SessionSettings> options)
+    {
+        _sessionSettings = options.Value;
+    }
 
     private Credential defaultCredentials = new Credential
     {
@@ -35,13 +43,15 @@ public class LoginModel : PageModel
                 new Claim(ClaimTypes.Name, "admin") ,
                 new Claim(ClaimTypes.Email, "admin@mywebsite.com"),
                 new Claim("Department", "HR"),
-                new Claim("Admin", "true")
+                new Claim("Admin", "true"),
+                new Claim("Manager", "true"),
+                new Claim("EmploymentDate", "2023-05-01")
             };
 
-            var identity = new ClaimsIdentity(claims, "webapp_cookie");
+            var identity = new ClaimsIdentity(claims, _sessionSettings.SessionCookie);
             ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync("webapp_cookie", claimsPrincipal);
+            await HttpContext.SignInAsync(_sessionSettings.SessionCookie, claimsPrincipal);
 
             return RedirectToPage("/Index");
         }
